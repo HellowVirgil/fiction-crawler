@@ -4,10 +4,11 @@ var mkdirp = require('mkdirp');
 
 exports.write_chapter = function(book_path, chapter, content){
   content = content.replace('[笔趣库手机版 m.biquku.com]', '');
-
+  var timeStamp = new Date();
   fs.writeFile('dist/' + book_path + chapter.num + '.html', content, function (err) {
     if (err) throw err;
     debug('It\'s saved!');
+    console.log(chapter.title + ' 抓取完成！耗时' + (new Date() - timeStamp) + 'ms');
   });
 }
 
@@ -21,6 +22,7 @@ exports.write_config = function(book_path, book){
       fs.writeFile('dist/' + book_path + 'book.json', content, function (err) {
         if (err) throw err;
         debug('It\'s saved!');
+        console.log('book.json 生成成功！');
       });
   });
 }
