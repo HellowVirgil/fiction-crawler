@@ -1,0 +1,23 @@
+{
+  "name": "fiction-crawler",
+  "version": "1.0.0",
+  "description": "a web crawler for fiction",
+  "main": "getBook.js",
+  "dependencies": {
+    "mkdirp": "^0.5.1",
+    "crawler": "^0.4.3",
+    "debug": "^2.2.0",
+    "jsdom": "^9.5.0"
+  },
+  "devDependencies": {
+    "crawler": "^0.4.3",
+    "debug": "^2.2.0",
+    "jsdom": "^9.5.0",
+    "mkdirp": "^0.5.1"
+  },
+  "scripts": {
+    "test": "node getBook.js"
+  },
+  "author": "HellowVirgil",
+  "license": "ISC"
+}
