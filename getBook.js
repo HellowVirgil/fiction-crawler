@@ -5,6 +5,7 @@ var utils = require('./utils.js')
 var current_book = {};
 var site_url = 'http://www.biquku.com/0/330/';
 var book_path = site_url.split('http://www.biquku.com/')[1];
+var timeStamp = new Date();
 
 var c = new Crawler({
     jQuery: jsdom,
@@ -53,7 +54,7 @@ function getOneChapter(chapter){
     // The global callback won't be called
     callback: function (error, result, $) {
       var content = $('#content').html();
-      utils.write_chapter(book_path, chapter, content);
+      utils.write_chapter(book_path, chapter, content, timeStamp);
       
       //process.exit();
     }
