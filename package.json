@@ -16,7 +16,7 @@
     "mkdirp": "^0.5.1"
   },
   "scripts": {
-    "test": "node getBook.js"
+    "build": "node ./src/getBook.js"
   },
   "author": "HellowVirgil",
   "license": "ISC"

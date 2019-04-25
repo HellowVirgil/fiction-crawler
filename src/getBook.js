@@ -1,9 +1,9 @@
 const Crawler = require('crawler');
 const jsdom = require('jsdom');
 const utils = require('./utils.js');
-const site_url = require('./config.js').site_url;
+const siteUrl = require('./config.js').site_url;
 
-let current_book = {};
+let currentBook = {};
 let timeStamp = new Date();
 
 let c = new Crawler({
@@ -15,46 +15,46 @@ let c = new Crawler({
     callback: function (error, result, $) {
         let urls = $('#list a');
 
-        current_book.title = $('#maininfo h1').text();
-        current_book.author = $('#info p').eq(0).text();
-        current_book.update_time = $('#info p').eq(2).text();
-        current_book.latest_chapter = $('#info p').eq(3).html();
-        current_book.intro = $('#intro').html();
-        current_book.chapters = [];
+        currentBook.title = $('#maininfo h1').text();
+        currentBook.author = $('#info p').eq(0).text();
+        currentBook.updateTime = $('#info p').eq(2).text();
+        currentBook.latestChapter = $('#info p').eq(3).html();
+        currentBook.intro = $('#intro').html();
+        currentBook.chapters = [];
 
         for (let i = 0; i < urls.length; i++) {
             let $url = $(urls[i]);
-            let _url = $url.attr('href') + '';
-            let num = _url.replace('.html', '');
+            let url = $url.attr('href') + '';
+            let num = url.replace('.html', '');
             let title = $url.text();
 
-            current_book.chapters.push({
+            currentBook.chapters.push({
                 num: num,
                 title: title,
-                url: _url
+                url: url
             });
         }
 
-        for (let i = 0; i < current_book.chapters.length; i++) {
+        for (let i = 0; i < currentBook.chapters.length; i++) {
             // 根据章节列表中的url获取每章正文
-            getOneChapter(current_book.chapters[i], current_book.chapters[i - 1], current_book.chapters[i + 1]);
+            getOneChapter(currentBook.chapters[i], currentBook.chapters[i - 1], currentBook.chapters[i + 1]);
         }
 
         // 生成 book.json
-        utils.write_config(current_book.title, current_book);
+        utils.writeConfig(currentBook.title, currentBook);
     }
 });
 
 function getOneChapter(chapter, lastChapter, nextChapter) {
     // 每章正文
     c.queue([{
-        uri: site_url + chapter.num + '.html',
+        uri: siteUrl + chapter.num + '.html',
         jQuery: jsdom,
         forceUTF8: true,
         // The global callback won't be called
         callback: function (error, result, $) {
             var content = $('#content').html();
-            utils.write_chapter(current_book.title, chapter, lastChapter, nextChapter, content, timeStamp);
+            utils.writeChapter(currentBook.title, chapter, lastChapter, nextChapter, content, timeStamp);
 
             // process.exit();
         }
@@ -63,7 +63,7 @@ function getOneChapter(chapter, lastChapter, nextChapter) {
 
 function start() {
     // 章节列表
-    c.queue(site_url);
+    c.queue(siteUrl);
 }
 
 start();

@@ -2,7 +2,7 @@ const fs = require('fs');
 const debug = require('debug')('crawler');
 const mkdirp = require('mkdirp');
 
-exports.write_chapter = function (book_path, chapter, lastChapter, nextChapter, content, timeStamp) {
+exports.writeChapter = function (bookTitle, chapter, lastChapter, nextChapter, content, timeStamp) {
     let chapterNum = parseInt(chapter.num, 10);
     let lastChapterNum = lastChapter ? parseInt(lastChapter.num, 10) : null;
     let nextChapterNum = nextChapter ? parseInt(nextChapter.num, 10) : null;
@@ -13,6 +13,7 @@ exports.write_chapter = function (book_path, chapter, lastChapter, nextChapter, 
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <meta http-equiv="X-UA-Compatible" content="ie=edge">
+            <link rel="stylesheet" href="../../src/style.css">
             <title>${chapter.title}</title>
         </head>
         <body>
@@ -26,7 +27,7 @@ exports.write_chapter = function (book_path, chapter, lastChapter, nextChapter, 
     </html>`;
     content = content.replace('[笔趣库手机版 m.biquku.com]', '');
 
-    fs.writeFile('dist/' + book_path + '/' + chapterNum + '.html', content, function (err) {
+    fs.writeFile('dist/' + bookTitle + '/' + chapterNum + '.html', content, function (err) {
         if (err) {
             throw err;
         }
@@ -36,8 +37,8 @@ exports.write_chapter = function (book_path, chapter, lastChapter, nextChapter, 
     });
 };
 
-exports.write_config = function (book_path, book) {
-    mkdirp('dist/' + book_path, function (err) {
+exports.writeConfig = function (bookTitle, book) {
+    mkdirp('dist/' + bookTitle, function (err) {
         if (err) {
             console.error(err);
         }
@@ -47,7 +48,7 @@ exports.write_config = function (book_path, book) {
 
         var content = JSON.stringify(book, null, 4); // Indented 4 spaces
 
-        fs.writeFile('dist/' + book_path + '/' + 'book.json', content, function (err) {
+        fs.writeFile('dist/' + bookTitle + '/' + 'book.json', content, function (err) {
             if (err) {
                 throw err;
             }
