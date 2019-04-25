@@ -23,19 +23,21 @@ let c = new Crawler({
         current_book.chapters = [];
 
         for (let i = 0; i < urls.length; i++) {
-            let url = urls[i];
-            let _url = $(url).attr('href') + '';
+            let $url = $(urls[i]);
+            let _url = $url.attr('href') + '';
             let num = _url.replace('.html', '');
-            let title = $(url).text();
+            let title = $url.text();
 
             current_book.chapters.push({
                 num: num,
                 title: title,
                 url: _url
             });
+        }
 
+        for (let i = 0; i < current_book.chapters.length; i++) {
             // 根据章节列表中的url获取每章正文
-            getOneChapter(current_book.chapters[i]);
+            getOneChapter(current_book.chapters[i], current_book.chapters[i - 1], current_book.chapters[i + 1]);
         }
 
         // 生成 book.json
@@ -43,7 +45,7 @@ let c = new Crawler({
     }
 });
 
-function getOneChapter(chapter) {
+function getOneChapter(chapter, lastChapter, nextChapter) {
     // 每章正文
     c.queue([{
         uri: site_url + chapter.num + '.html',
@@ -52,7 +54,7 @@ function getOneChapter(chapter) {
         // The global callback won't be called
         callback: function (error, result, $) {
             var content = $('#content').html();
-            utils.write_chapter(current_book.title, chapter, content, timeStamp);
+            utils.write_chapter(current_book.title, chapter, lastChapter, nextChapter, content, timeStamp);
 
             // process.exit();
         }

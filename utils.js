@@ -2,8 +2,10 @@ const fs = require('fs');
 const debug = require('debug')('crawler');
 const mkdirp = require('mkdirp');
 
-exports.write_chapter = function (book_path, chapter, content, timeStamp) {
+exports.write_chapter = function (book_path, chapter, lastChapter, nextChapter, content, timeStamp) {
     let chapterNum = parseInt(chapter.num, 10);
+    let lastChapterNum = lastChapter ? parseInt(lastChapter.num, 10) : null;
+    let nextChapterNum = nextChapter ? parseInt(nextChapter.num, 10) : null;
 
     content = `<!DOCTYPE html>
         <html lang="en">
@@ -17,8 +19,8 @@ exports.write_chapter = function (book_path, chapter, content, timeStamp) {
             <h3 class="title">${chapter.title}</h3>
             <div class="content">${content}</div>
             <div class="pagination">
-                <a href="${chapterNum - 1}.html">上一章</a>
-                <a href="${chapterNum + 1}.html">下一章</a>
+                ${lastChapterNum ? `<a href="${lastChapterNum}.html">上一章</a>` : ''}
+                ${nextChapterNum ? `<a href="${nextChapterNum}.html">下一章</a>` : ''}
             </div>
         </body>
     </html>`;
