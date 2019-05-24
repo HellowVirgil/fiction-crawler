@@ -1,10 +1,36 @@
 
 body {
     margin: 0;
+    padding: 0;
 }
 .title {
     padding: 0 10px;
     font-size: 18px;
+}
+.author,
+.update-time {
+    padding: 0 10px;
+    font-size: 16px;
+}
+.latest-chapter,
+.intro {
+    margin: 10px 0;
+    padding: 0 10px;
+}
+.catalog {
+    margin: 0 10px;
+    padding: 0;
+}
+.catalog p {
+    margin: 5px 0;
+}
+.catalog li {
+    display: block;
+    padding: 5px 0;
+    list-style: none;
+}
+.catalog li a {
+    text-decoration: none;
 }
 .content {
     padding: 0 10px;

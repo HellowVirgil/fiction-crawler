@@ -53,7 +53,7 @@ function getOneChapter(chapter, lastChapter, nextChapter) {
         forceUTF8: true,
         // The global callback won't be called
         callback: function (error, result, $) {
-            var content = $('#content').html();
+            let content = utils.formatContent($('#content').html());
             utils.writeChapter(currentBook.title, chapter, lastChapter, nextChapter, content, timeStamp);
 
             // process.exit();
