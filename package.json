@@ -6,14 +6,10 @@
   "dependencies": {
     "mkdirp": "^0.5.1",
     "debug": "^2.2.0",
-    "jsdom": "^9.5.0"
-  },
-  "devDependencies": {
-    "crawler": "^1.2.1",
-    "debug": "^2.2.0",
     "jsdom": "^9.5.0",
-    "mkdirp": "^0.5.1"
+    "crawler": "^1.2.1"
   },
+  "devDependencies": {},
   "scripts": {
     "build": "node ./src/getBook.js"
   },
