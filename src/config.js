@@ -1,3 +1,3 @@
 module.exports = {
-    site_url: 'https://www.biquku.com/0/122/'
+  site_url: 'https://www.biquku.com/0/122/',
 };
