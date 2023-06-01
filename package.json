@@ -4,10 +4,14 @@
   "description": "a web crawler for fiction",
   "main": "src/main.js",
   "dependencies": {
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
     "crawler": "^1.2.1",
     "debug": "^2.2.0",
+    "express": "^4.18.2",
     "jsdom": "^9.5.0",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "f2elint": "^1.1.2"
@@ -15,7 +19,8 @@
   "scripts": {
     "build": "node ./src/main.js",
     "f2elint-scan": "f2elint scan",
-    "f2elint-fix": "f2elint fix"
+    "f2elint-fix": "f2elint fix",
+    "serve": "node src/demo.js"
   },
   "author": "HellowVirgil",
   "license": "ISC",

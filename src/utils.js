@@ -3,9 +3,9 @@ const debug = require('debug')('crawler');
 const mkdirp = require('mkdirp');
 
 exports.writeChapter = function (bookTitle, chapter, lastChapter, nextChapter, content, timeStamp) {
-  const chapterNum = parseInt(chapter.num, 10);
-  const lastChapterNum = lastChapter ? parseInt(lastChapter.num, 10) : null;
-  const nextChapterNum = nextChapter ? parseInt(nextChapter.num, 10) : null;
+  const chapterName = chapter.name;
+  const lastChapterName = lastChapter ? lastChapter.name : null;
+  const nextChapterName = nextChapter ? nextChapter.name : null;
 
   content = `<!DOCTYPE html>
     <html lang="en">
@@ -13,20 +13,20 @@ exports.writeChapter = function (bookTitle, chapter, lastChapter, nextChapter, c
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <link rel="stylesheet" href="../../src/style.css">
+        <link rel="stylesheet" href="/assets/style.css">
         <title>${chapter.title}</title>
       </head>
       <body>
         <h3 class="title">${chapter.title}</h3>
         <div class="content">${content}</div>
         <div class="pagination">
-          ${lastChapterNum ? `<a href="${lastChapterNum}.html">上一章</a>` : ''}
-          ${nextChapterNum ? `<a href="${nextChapterNum}.html">下一章</a>` : ''}
+          ${lastChapterName ? `<a href="dist/${lastChapterName}.html">上一个</a>` : ''}
+          ${nextChapterName ? `<a href="dist/${nextChapterName}.html">下一个</a>` : ''}
         </div>
       </body>
     </html>`;
 
-  fs.writeFile(`dist/${bookTitle}/${chapterNum}.html`, content, (err) => {
+  fs.writeFile(`dist/${bookTitle}/${chapterName}.html`, content, (err) => {
     if (err) {
       throw err;
     }
@@ -46,7 +46,7 @@ exports.writeConfig = function (bookTitle, book) {
 
     const catalog = book.chapters
       .map(
-        (element) => `<li class="catalog-item"><a href="${element.url}">${element.title}</a></li>`,
+        (element) => `<li class="catalog-item"><a href="dist/${element.title}.html">${element.title}</a></li>`,
       )
       .join('');
     const content = `<!DOCTYPE html>
@@ -55,15 +55,11 @@ exports.writeConfig = function (bookTitle, book) {
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <meta http-equiv="X-UA-Compatible" content="ie=edge">
-          <link rel="stylesheet" href="../../src/style.css">
+          <link rel="stylesheet" href="/assets/style.css">
           <title>${book.title}</title>
         </head>
         <body>
           <h3 class="title">${book.title}</h3>
-          <p class="author">作者：${book.author}</p>
-          <p class="update-time">更新时间：${book.updateTime}</p>
-          <div class="latest-chapter">最新章节：${book.latestChapter}</div>
-          <div class="intro">简介：${book.intro}</div>
           <ul class="catalog">
             <p>目录：</p>
             ${catalog}
