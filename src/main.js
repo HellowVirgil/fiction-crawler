@@ -108,12 +108,12 @@ function getOneChapter(crawler, title, chapter, lastChapter, nextChapter) {
   });
 }
 
-function start() {
+function start(page) {
   const c = initCrawler();
 
   // 章节列表
   if (typeof siteUrl === 'string') {
-    c.queue(siteUrl);
+    c.queue(siteUrl+page);
   } else if (Object.prototype.toString.call(siteUrl) === '[object Array]') {
     siteUrl.forEach((item) => {
       c.queue(item);
@@ -123,4 +123,4 @@ function start() {
   }
 }
 
-start();
+start(5);
