@@ -30,6 +30,7 @@ class Core {
     constructor(siteUrl) {
         this.c = null
         this.project = siteUrl
+        this.startUrl = ''
         this.projectDir = this.formatDir(siteUrl)
         this.projectDirFull = `/dist/${this.projectDir}/`
         this.pageSum = 0
@@ -39,15 +40,15 @@ class Core {
         }
         this.downloadNum = 0
     }
-    start() {
-        
+    start(url = '') {
+        this.startUrl = url || this.project
         this.initCrawler();
 
         // 章节列表
-        if (typeof this.project === 'string') {
-            this.c.queue(this.project);
-        } else if (Object.prototype.toString.call(this.project) === '[object Array]') {
-            this.project.forEach((item) => {
+        if (typeof this.startUrl === 'string') {
+            this.c.queue(this.startUrl);
+        } else if (Object.prototype.toString.call(this.startUrl) === '[object Array]') {
+            this.startUrl.forEach((item) => {
                 this.c.queue(item);
             });
         } else {
@@ -58,8 +59,8 @@ class Core {
       
         this.c = new Crawler({
             jQuery: jsdom,
-            maxConnections: 10,
-            // rateLimit: 1e3,
+            // maxConnections: 10,
+            rateLimit: 1e3,
             forceUTF8: true,
             timeout: 1e5,
             // incomingEncoding: 'gb2312',
@@ -81,7 +82,7 @@ class Core {
                     
                     const content = this.formatContent(html);
             
-                    const dirName = `dist/${this.projectDir}/`
+                    const dirName = `dist/${this.projectDir}/` + decodeURI(this.startUrl.replace(this.project, ''))
                     this.writePage(dirName, content);
                     // 生成首页内容-------------------- end
                 }
@@ -129,10 +130,13 @@ class Core {
         if(!fs.existsSync(dirName)) {
             this.mkdirsSync(dirName)
         }
-        this.downloadNum++
+        // this.downloadNum++
         request(encodeURI(imgUrl)).pipe(fs.createWriteStream(fileName)).on('close', () => {
-            this.downloadNum--
-            console.log('pic saved!', this.downloadNum)
+            // this.downloadNum--
+            // console.log('pic saved!', this.downloadNum)
+            log.info(encodeURI(imgUrl))
+        }).on('error', e => {
+            log.error(e)
         })
     }
     mkdirsSync(dirName) {
@@ -220,12 +224,12 @@ class Core {
                 }
             
                 debug("It's saved!");
-                console.log('目录生成成功！');
+                console.log('页面生成成功！');
             });
         });
     }
     getOneChapter(chapter) {
-        // 每章正文
+        // 分页
         this.c.queue({
             uri: chapter.url,
             jQuery: jsdom,
@@ -241,9 +245,9 @@ class Core {
                     let html = $('html').html()
                     
                     // 获取详情页------------------------- start
-                    const urls = $('a');
+                    // const urls = $('a');
 
-                    this.getUrls($, urls)
+                    // this.getUrls($, urls)
                     // 获取详情页------------------------- end
 
                     const content = this.formatContent(html);
@@ -258,5 +262,5 @@ class Core {
 }
 
 const core = new Core('https://lxsw2020.com/')
-
+// 'https://lxsw2020.com/category/%E6%A8%A1%E7%89%B9%E5%B1%95%E7%A4%BA/page/14/'
 core.start()
