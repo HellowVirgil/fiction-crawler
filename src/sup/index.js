@@ -10,20 +10,42 @@ var log4js = require('log4js');
 
 log4js.configure({
 	"appenders":{
-        cheeseLogs: {
+        pageStart: {
             "type": "file",
-            "filename": path.resolve(__dirname, '../../logs/logger.log'),
-            "category": "logger" 
+            "filename": path.resolve(__dirname, '../../logs/pageStart.log'),
+            "category": "pageStart" 
+        },
+        pageEnd: {
+            "type": "file",
+            "filename": path.resolve(__dirname, '../../logs/pageEnd.log'),
+            "category": "pageEnd" 
+        },
+        assetsStart: {
+            "type": "file",
+            "filename": path.resolve(__dirname, '../../logs/assetsStart.log'),
+            "category": "assetsStart" 
+        },
+        assetsEnd: {
+            "type": "file",
+            "filename": path.resolve(__dirname, '../../logs/assetsEnd.log'),
+            "category": "assetsEnd" 
         },
 		console: { type: 'console' }
 	},
     categories: {
-        cheese: { appenders: ['cheeseLogs'], level: 'error' },
+        cheese: { appenders: ['pageEnd'], level: 'error' },
         another: { appenders: ['console'], level: 'trace' },
-        default: { appenders: ['console', 'cheeseLogs'], level: 'trace' }
+        default: { appenders: ['console', 'pageStart'], level: 'trace' },
+        pageEnd: { appenders: ['console', 'pageEnd'], level: 'trace' },
+        pageStart: { appenders: ['console', 'pageStart'], level: 'trace' },
+        assetsStart: { appenders: ['console', 'assetsStart'], level: 'trace' },
+        assetsEnd: { appenders: ['console', 'assetsEnd'], level: 'trace' },
     }
 })
-var log = log4js.getLogger('logger')
+var pageStart = log4js.getLogger('pageStart')
+var pageEnd = log4js.getLogger('pageEnd')
+var assetsStart = log4js.getLogger('assetsStart')
+var assetsEnd = log4js.getLogger('assetsEnd')
 
 
 class Core {
@@ -60,14 +82,14 @@ class Core {
         this.c = new Crawler({
             jQuery: jsdom,
             // maxConnections: 10,
-            rateLimit: 1e3,
+            rateLimit: 2e3,
             forceUTF8: true,
             timeout: 1e5,
             // incomingEncoding: 'gb2312',
             // This will be called for each crawled page
             callback: (error, res, done) => {
                 if (error) {
-                    log.error(error)
+                    pageEnd.error(error)
                 } else {
                     const { $ } = res;
 
@@ -131,12 +153,13 @@ class Core {
             this.mkdirsSync(dirName)
         }
         // this.downloadNum++
+        assetsStart.info(decodeURI(imgUrl))
         request(encodeURI(imgUrl)).pipe(fs.createWriteStream(fileName)).on('close', () => {
             // this.downloadNum--
             // console.log('pic saved!', this.downloadNum)
-            log.info(encodeURI(imgUrl))
+            assetsEnd.info(decodeURI(imgUrl))
         }).on('error', e => {
-            log.error(e)
+            assetsEnd.error(e)
         })
     }
     mkdirsSync(dirName) {
@@ -229,6 +252,7 @@ class Core {
         });
     }
     getOneChapter(chapter) {
+        pageStart.info(decodeURI(chapter.url))
         // 分页
         this.c.queue({
             uri: chapter.url,
@@ -236,9 +260,9 @@ class Core {
             forceUTF8: true,
             // The global callback won't be called
             callback: (error, res, done) => {
-                log.info(chapter.url)
+                pageEnd.info(decodeURI(chapter.url))
                 if (error) {
-                    log.error(error)
+                    pageEnd.error(error)
                 }
                 else {
                     const { $ } = res;
