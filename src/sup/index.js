@@ -245,9 +245,9 @@ class Core {
                     let html = $('html').html()
                     
                     // 获取详情页------------------------- start
-                    // const urls = $('a');
+                    const urls = $('a');
 
-                    // this.getUrls($, urls)
+                    this.getUrls($, urls)
                     // 获取详情页------------------------- end
 
                     const content = this.formatContent(html);
