@@ -144,9 +144,7 @@ class Core {
         console.log('>>>pageSum ', this.pageSum)
     }
     downloadImg(imgUrl, fileName) {
-        if(fs.existsSync(fileName)) {
-            return false
-        }
+        
         const dirName = fileName.match(/(.*)\//)[1]
         
         if(!fs.existsSync(dirName)) {
@@ -203,12 +201,19 @@ class Core {
         html = html.replace(/srcset/g, '_srcset')
 
         // 下载资源
+        let time = 0
         for (let i = 0; i < srcs.length; i++) {
             const src = srcs[i]
             const fileName = src.replace(/(.*\/)/g, '')
             const _src = src.replace(/http[^"]*(com|org)/g, path.resolve(__dirname, '../..' + this.projectDirFull))
             if (fileName.match(/\./)) {
-                this.downloadImg(src, _src)
+                if(!fs.existsSync(_src)) {
+                    time ++
+                    const timeout = time * 1e3
+                    setTimeout(() => {
+                        this.downloadImg(src, _src) 
+                    }, timeout);
+                }
             }
         }
 
