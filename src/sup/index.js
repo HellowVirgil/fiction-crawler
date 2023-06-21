@@ -56,6 +56,7 @@ class Core {
         this.projectDir = this.formatDir(siteUrl)
         this.projectDirFull = `/dist/${this.projectDir}/`
         this.pageSum = 0
+        this.srcs = []
         this.currentPage = {
             title: '',
             chapters: []
@@ -150,16 +151,22 @@ class Core {
         if(!fs.existsSync(dirName)) {
             this.mkdirsSync(dirName)
         }
-        // this.downloadNum++
         assetsStart.info(decodeURI(imgUrl))
-        request(encodeURI(imgUrl)).pipe(fs.createWriteStream(fileName)).on('close', () => {
-            // this.downloadNum--
-            // console.log('pic saved!', this.downloadNum)
+        this.download(imgUrl, fileName)
+    }
+    download(imgUrl, fileName) {
+        const downloadStream = request(encodeURI(imgUrl))
+        downloadStream.pipe(fs.createWriteStream(fileName)).on('close', () => {
             assetsEnd.info(decodeURI(imgUrl))
-        }).on('error', e => {
-            assetsEnd.error(e)
+        })
+        downloadStream.on('error', e => {
+            assetsEnd.error(`下载图片 ${decodeURI(imgUrl)} 出错,准备重试`, JSON.stringify(e))
+            if (e.code === 'ETIMEDOUT') {
+                this.download(imgUrl, fileName)
+            }
         })
     }
+    
     mkdirsSync(dirName) {
         if(fs.existsSync(dirName)) {
             return true;
@@ -207,7 +214,8 @@ class Core {
             const fileName = src.replace(/(.*\/)/g, '')
             const _src = src.replace(/http[^"]*(com|org)/g, path.resolve(__dirname, '../..' + this.projectDirFull))
             if (fileName.match(/\./)) {
-                if(!fs.existsSync(_src)) {
+                if(!fs.existsSync(_src) && !this.srcs.find(s => s === src)) {
+                    this.srcs.push(src)
                     time ++
                     const timeout = time * 1e3
                     setTimeout(() => {
