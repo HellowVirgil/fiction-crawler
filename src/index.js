@@ -49,11 +49,10 @@ var assetsEnd = log4js.getLogger('assetsEnd')
 
 
 class Core {
-    constructor(siteUrl) {
+    constructor(hostUrl) {
         this.c = null
-        this.project = siteUrl
-        this.startUrl = ''
-        this.projectDirFull = ``
+        this.host = hostUrl
+        this.pageId = ''
         this.pageSum = 0
         this.srcs = []
         this.currentPage = {
@@ -62,23 +61,14 @@ class Core {
         }
         this.downloadNum = 0
     }
-    start(url = '') {
-        this.startUrl = url || this.project
+    start(pageId) {
+        this.pageId = pageId
         this.initCrawler();
 
         // 章节列表
-        if (typeof this.startUrl === 'string') {
-            this.c.queue(this.startUrl);
-        } else if (Object.prototype.toString.call(this.startUrl) === '[object Array]') {
-            this.startUrl.forEach((item) => {
-                this.c.queue(item);
-            });
-        } else {
-            throw new Error('Invalid site_url type.');
-        }
+        this.c.queue(this.host + this.pageId);
     }
     initCrawler() {
-      
         this.c = new Crawler({
             jQuery: jsdom,
             // maxConnections: 10,
@@ -86,6 +76,9 @@ class Core {
             forceUTF8: true,
             timeout: 1e5,
             // incomingEncoding: 'gb2312',
+            // method: 'GET',
+            // strictSSL: true,
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
             // This will be called for each crawled page
             callback: (error, res, done) => {
                 if (error) {
@@ -94,7 +87,7 @@ class Core {
                     const { $ } = res;
 
                     // 获取详情页------------------------- start
-                    const urls = $('a');
+                    const urls = $('#list a');
 
                     this.getUrls($, urls)
                     // 获取详情页------------------------- end
@@ -103,9 +96,9 @@ class Core {
                     let html = $('html').html()
                     
                     const content = this.formatContent(html);
+                    const page = 'index.html'
             
-                    const dirName = decodeURI(this.startUrl.replace(this.project, this.projectDirFull))
-                    this.writePage(dirName, content);
+                    this.writePage('../'+this.pageId, page, content);
                     // 生成首页内容-------------------- end
                 }
                 done();
@@ -117,28 +110,21 @@ class Core {
     getUrls($, urls) {
         for (let i = 0; i < urls.length; i++) {
             const $url = $(urls[i]);
-            const url = $url.attr('href') + '';
+            const name = decodeURI($url.html())
+            const url = this.host + $url.attr('href') + '';
             const urlArr = url.split('/')
-            const dirArr = url.split(this.project)
-            const dirName = decodeURI(dirArr[dirArr.length-1])
-            const name = decodeURI(urlArr[urlArr.length-2])
-            const title = name
+            const page = decodeURI(urlArr[urlArr.length-1])
             const isLoaded = false
             if (!this.currentPage.chapters.find(el => el.url === url)) {
-                this.currentPage.chapters.push({name, title, url, dirName, isLoaded});
+                this.currentPage.chapters.push({name, url, page, isLoaded});
             }
         }
         for (let i = 0; i < this.currentPage.chapters.length; i++) {
             const item = this.currentPage.chapters[i]
-            const href = decodeURI(item.url)
-            const isProject = !!item.url.match(this.project) && !!href.match(/[\u4E00-\u9FA5]/g)
-            if (isProject && !item.isLoaded) {
+            if (!item.isLoaded) {
                 this.pageSum ++
                 item.isLoaded = true
-                // url获取正文
-                // setTimeout(() => {
-                    this.getOneChapter(item);
-                // }, 5e3 * i);
+                this.getOneChapter(item);
             }
         }
         console.log('>>>pageSum ', this.pageSum)
@@ -188,7 +174,7 @@ class Core {
                         srcs.push(s.replace(/\\/g, ''))
                     }
                 })
-                return src.replace(/http[^"]*(com|org)\//g, this.projectDirFull)
+                return src.replace(/http[^"]*(com|org)\//g, this.pageId)
             })
         })
 
@@ -196,7 +182,7 @@ class Core {
         html = html.replace(/\<script.*script\>/g, '')
         html = html.replace(/script/g, 'noscript')
         html = html.replace(/http(s)?:\/\/[^"\s]*/g, s => {
-            if (s.match(this.project)) {
+            if (s.match(this.host)) {
                 return s
             } else {
                 return ''
@@ -215,7 +201,7 @@ class Core {
         for (let i = 0; i < srcs.length; i++) {
             const src = srcs[i]
             const fileName = src.replace(/(.*\/)/g, '')
-            const _src = src.replace(/http[^"]*(com|org)/g, path.resolve(__dirname, '..' + this.projectDirFull))
+            const _src = src.replace(/http[^"]*(com|org)/g, path.resolve(__dirname, '../' + this.pageId))
             if (fileName.match(/\./)) {
                 if(!fs.existsSync(_src) && !this.srcs.find(s => s === src)) {
                     this.srcs.push(src)
@@ -233,7 +219,7 @@ class Core {
         html = html.replace(/(")(http(s)?:\/\/[^"]*)(")/g, s => {
             const href = decodeURI(s)
             if (href.match(/[\u4E00-\u9FA5]/g)) {
-                return href.replace(this.project, this.projectDirFull)
+                return href.replace(this.host, this.pageId)
             } else {
                 return `""`
             }
@@ -241,7 +227,7 @@ class Core {
         
         return html
     }
-    writePage(filepath, res) {
+    writePage(filepath, page, res) {
         mkdirp(filepath, (err) => {
             if (err) {
                 console.error(err);
@@ -254,7 +240,7 @@ class Core {
             ${res}
             </html>`;
         
-            fs.writeFile(`${filepath}index.html`, content, (e) => {
+            fs.writeFile(`${filepath}/${page}`, content, (e) => {
                 if (e) {
                     throw e;
                 }
@@ -270,8 +256,8 @@ class Core {
         this.c.queue({
             uri: chapter.url,
             jQuery: jsdom,
-            forceUTF8: true,
-            // The global callback won't be called
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+            // This will be called for each crawled page
             callback: (error, res, done) => {
                 pageEnd.info(decodeURI(chapter.url))
                 if (error) {
@@ -282,15 +268,16 @@ class Core {
                     let html = $('html').html()
                     
                     // 获取详情页------------------------- start
-                    const urls = $('a');
+                    // const urls = $('a');
 
-                    this.getUrls($, urls)
+                    // this.getUrls($, urls)
                     // 获取详情页------------------------- end
 
                     const content = this.formatContent(html);
-                    const dirName = `${chapter.dirName}`
+                    const dirName = `../${this.pageId}`
+                    const page = `${chapter.page}`
 
-                    this.writePage(dirName, content);
+                    this.writePage(dirName, page, content);
                 }
                 done();
             },
@@ -298,6 +285,5 @@ class Core {
     }
 }
 
-const core = new Core('https://lxsw2020.com/')
-// 'https://lxsw2020.com/category/%E6%A8%A1%E7%89%B9%E5%B1%95%E7%A4%BA/page/14/'
-core.start()
+const core = new Core('http://www.ibiqu.org/')
+core.start('52_52542')
