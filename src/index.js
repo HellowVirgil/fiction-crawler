@@ -12,22 +12,22 @@ log4js.configure({
 	"appenders":{
         pageStart: {
             "type": "file",
-            "filename": path.resolve(__dirname, '../../logs/pageStart.log'),
+            "filename": path.resolve(__dirname, '../logs/pageStart.log'),
             "category": "pageStart" 
         },
         pageEnd: {
             "type": "file",
-            "filename": path.resolve(__dirname, '../../logs/pageEnd.log'),
+            "filename": path.resolve(__dirname, '../logs/pageEnd.log'),
             "category": "pageEnd" 
         },
         assetsStart: {
             "type": "file",
-            "filename": path.resolve(__dirname, '../../logs/assetsStart.log'),
+            "filename": path.resolve(__dirname, '../logs/assetsStart.log'),
             "category": "assetsStart" 
         },
         assetsEnd: {
             "type": "file",
-            "filename": path.resolve(__dirname, '../../logs/assetsEnd.log'),
+            "filename": path.resolve(__dirname, '../logs/assetsEnd.log'),
             "category": "assetsEnd" 
         },
 		console: { type: 'console' }
@@ -53,8 +53,7 @@ class Core {
         this.c = null
         this.project = siteUrl
         this.startUrl = ''
-        this.projectDir = this.formatDir(siteUrl)
-        this.projectDirFull = `/dist/${this.projectDir}/`
+        this.projectDirFull = ``
         this.pageSum = 0
         this.srcs = []
         this.currentPage = {
@@ -105,7 +104,7 @@ class Core {
                     
                     const content = this.formatContent(html);
             
-                    const dirName = `dist/${this.projectDir}/` + decodeURI(this.startUrl.replace(this.project, ''))
+                    const dirName = decodeURI(this.startUrl.replace(this.project, this.projectDirFull))
                     this.writePage(dirName, content);
                     // 生成首页内容-------------------- end
                 }
@@ -207,12 +206,16 @@ class Core {
         // 删除srcset
         html = html.replace(/srcset/g, '_srcset')
 
+        // 替换源
+        html = html.replace(/勒享/g, '新屋')
+        html = html.replace(/(lxsw2020|Lxsw2020)/g, 'xinwu')
+
         // 下载资源
         let time = 0
         for (let i = 0; i < srcs.length; i++) {
             const src = srcs[i]
             const fileName = src.replace(/(.*\/)/g, '')
-            const _src = src.replace(/http[^"]*(com|org)/g, path.resolve(__dirname, '../..' + this.projectDirFull))
+            const _src = src.replace(/http[^"]*(com|org)/g, path.resolve(__dirname, '..' + this.projectDirFull))
             if (fileName.match(/\./)) {
                 if(!fs.existsSync(_src) && !this.srcs.find(s => s === src)) {
                     this.srcs.push(src)
@@ -232,14 +235,11 @@ class Core {
             if (href.match(/[\u4E00-\u9FA5]/g)) {
                 return href.replace(this.project, this.projectDirFull)
             } else {
-                return '""'
+                return `""`
             }
         })
         
         return html
-    }
-    formatDir(filepath) {
-        return filepath.replace(/[\.:]/g, '_').replace(/\//g, '')
     }
     writePage(filepath, res) {
         mkdirp(filepath, (err) => {
@@ -260,7 +260,7 @@ class Core {
                 }
             
                 debug("It's saved!");
-                console.log('页面生成成功！');
+                console.log('>>>页面生成成功！', filepath);
             });
         });
     }
@@ -288,7 +288,7 @@ class Core {
                     // 获取详情页------------------------- end
 
                     const content = this.formatContent(html);
-                    const dirName = `dist/${this.projectDir}/${chapter.dirName}`
+                    const dirName = `${chapter.dirName}`
 
                     this.writePage(dirName, content);
                 }

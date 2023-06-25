@@ -1,8 +1,8 @@
 {
-  "name": "fiction-crawler",
+  "name": "sw-cn",
   "version": "1.0.0",
-  "description": "a web crawler for fiction",
-  "main": "src/main.js",
+  "description": "小网站爬虫",
+  "main": "src/index.js",
   "dependencies": {
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
@@ -20,10 +20,10 @@
   "scripts": {
     "f2elint-scan": "f2elint scan",
     "f2elint-fix": "f2elint fix",
-    "build": "node ./src/sup/index.js",
-    "serve": "node src/sup/serve.js"
+    "build": "node ./src/index.js",
+    "serve": "node src/serve.js"
   },
-  "author": "HellowVirgil",
+  "author": "No2015",
   "license": "ISC",
   "husky": {
     "hooks": {
